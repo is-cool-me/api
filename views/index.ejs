@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>is-cool-me API</title>
+
+        <!-- Scripts -->
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+
+    <body class="p-8 max-w-fit m-auto bg-zinc-900 text-white text-center">
+        <main>
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold">Endpoints</h2>
+            </header>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/check?domain=:domain</code>
+                <p class="mt-4">Check if a domain name is available.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/count</code>
+                <p class="mt-4">Get statistics about all of our domains.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/domains/:domain</code>
+                <p class="mt-4">Get statistics about a root domain.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/lookup/domain?domain=:domain</code>
+                <p class="mt-4">Get information about a user's domain.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/lookup/user?email=:email</code>
+                <p class="mt-4">Get information about a user.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800 rounded-lg mb-8">
+                <span class="text-sm font-medium px-2.5 py-1 rounded-full bg-green-900 text-green-300 mr-1">GET</span>
+                <code class="p-1 rounded-lg px-1 pl-2 pr-2 bg-gray-600">/raw</code>
+                <p class="mt-4">Returns all user domains in a JSON data dump.</p>
+            </div>
+        </main>
+    </body>
+</html>
