@@ -14,7 +14,8 @@ jobs:
     build-and-deploy:
         name: Build and Deploy
         runs-on: ubuntu-latest
-
+        permissions: write-all
+        
         steps:
             - uses: actions/checkout@v3
 
