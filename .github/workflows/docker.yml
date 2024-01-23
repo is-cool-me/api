@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   FTP_SERVER: ftpupload.net
+  FTP_PORT: 21
   FTP_USER: ${{ secrets.FTP_USER }}
   FTP_PASS: ${{ secrets.FTP_PASS }}
 
@@ -46,5 +47,5 @@ jobs:
       - name: Deploy via FTP
         run: |
           find . -type f -exec curl -X POST -u "${{ env.FTP_USER }}:${{ env.FTP_PASS }}" \
-          --ftp-ssl "${{ env.FTP_SERVER }}/api.ahft.me/htdocs/" \
+          --ftp-ssl "${{ env.FTP_SERVER }}:${{ env.FTP_PORT }}/api.ahft.me/htdocs/" \
           -T {} \;
