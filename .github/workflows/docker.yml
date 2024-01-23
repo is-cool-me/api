@@ -48,4 +48,5 @@ jobs:
         run: |
           find . -type f -exec curl -X POST -u "${{ env.FTP_USER }}:${{ env.FTP_PASS }}" \
           --ftp-ssl "${{ env.FTP_SERVER }}:${{ env.FTP_PORT }}/api.ahft.me/htdocs/" \
+          --http1.1 \
           -T {} \;
