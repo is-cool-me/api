@@ -49,8 +49,7 @@ module.exports = async (req, res) => {
             "AAAA": data.filter(item => item.records.AAAA).length,
             "CNAME": data.filter(item => item.records.CNAME).length,
             "MX": data.filter(item => item.records.MX).length,
-            "TXT": data.filter(item => item.records.TXT).length,
-            "NS": data.filter(item => item.records.NS).length
+            "TXT": data.filter(item => item.records.TXT).length
         },
         "proxied": {
             "true": data.filter(item => item.proxied === true).length,
