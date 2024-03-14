@@ -1,5 +1,5 @@
 const express = require("express");
-const path = require("path"); // Add this line to import the path module
+const path = require("path"); // Import the path module
 
 const app = express();
 
@@ -29,6 +29,10 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Set the views directory
+app.set('views', path.join(__dirname, 'views'));
+
+// Set the view engine
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
 
