@@ -1,4 +1,6 @@
 const express = require("express");
+const path = require("path"); // Add this line to import the path module
+
 const app = express();
 
 require("dotenv").config();
@@ -27,11 +29,9 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-// View engine configuration
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.engine("html", require("ejs").renderFile);
+app.set("view engine", "ejs");
 
-// Define routes
 app.use("/", router);
 
 app.use(Sentry.Handlers.errorHandler());
