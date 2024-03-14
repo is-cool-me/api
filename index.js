@@ -27,13 +27,15 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+// View engine configuration
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
 
+// Define routes
 app.use("/", router);
 
 app.use(Sentry.Handlers.errorHandler());
 
 app.listen(port, () => {
     console.log(`[API] Listening on Port: ${port}`);
-})
+});
