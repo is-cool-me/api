@@ -8,13 +8,16 @@ module.exports = async (req, res) => {
     let data;
 
     try {
-        // Check if file exists in the 'domains' folder
         let result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`);
         data = await result.json();
 
         if(result.status == 404) {
-            // If file not found in 'domains' folder, check in 'domains/AorzoHosting' folder
             result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`);
+            data = await result.json();
+        }
+
+        if(result.status == 404) {
+            result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`);
             data = await result.json();
         }
     } catch(err) {
