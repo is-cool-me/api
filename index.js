@@ -28,8 +28,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
 // View engine configuration
-app.engine("html", require("ejs").renderFile);
-app.set("view engine", "ejs");
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Define routes
 app.use("/", router);
