@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
 
     // Build domains array from map
     const domains = Array.from(domainMap.entries()).map(([domain, subs]) => ({
-        domain: domain,
+        domain,
         count: subs.length,
         subdomains: subs
     }));
