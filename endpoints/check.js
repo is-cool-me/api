@@ -8,6 +8,7 @@ module.exports = async (req, res) => {
     let data;
 
     const requestTimeout = 8000; // 8 second timeout per request
+    const ABORT_ERR_CODE = 20; // DOMException.ABORT_ERR
     
     try {
         // Helper function to create fetch with timeout
@@ -37,7 +38,7 @@ module.exports = async (req, res) => {
         }
     } catch(err) {
         // Check for timeout/abort errors
-        if (err.name === 'AbortError' || (err.code === 20)) {
+        if (err.name === 'AbortError' || err.code === ABORT_ERR_CODE) {
             return res.status(504).json({ "error": "Request timeout" });
         }
         return res.status(500).json({ "error": "Failed to fetch data" });
