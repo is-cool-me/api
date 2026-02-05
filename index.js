@@ -1,29 +1,28 @@
-const express = require("express");
-const path = require("path"); // Import the path module
-
-const app = express();
-
+// Load environment variables first
 require("dotenv").config();
-const port = 3000;
 
+// Initialize Sentry before any other imports
 const Sentry = require("@sentry/node");
-const bodyParser = require("body-parser");
-const cors = require("cors");
 
 Sentry.init({
     dsn: process.env.sentry_dsn,
     integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.Express({ app }),
-        ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations()
+        Sentry.httpIntegration({ tracing: true }),
+        Sentry.expressIntegration(),
     ],
     tracesSampleRate: 1.0
 })
 
-const router = require("./util/router");
+// Now import other modules
+const express = require("express");
+const path = require("path");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+const app = express();
+const port = 3000;
+
+const router = require("./util/router");
 
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,8 +37,14 @@ app.set("view engine", "ejs");
 
 app.use("/", router);
 
-app.use(Sentry.Handlers.errorHandler());
+Sentry.setupExpressErrorHandler(app);
 
-app.listen(port, () => {
-    console.log(`[API] Listening on Port: ${port}`);
-});
+// Export the app for Vercel serverless functions
+module.exports = app;
+
+// Only start the server if running locally (not on Vercel)
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`[API] Listening on Port: ${port}`);
+    });
+}
