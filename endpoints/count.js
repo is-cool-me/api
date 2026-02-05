@@ -13,50 +13,59 @@ module.exports = async (req, res) => {
         return res.status(500).json({ "error": "Failed to fetch data" });
     }
 
-    const ownerEmails = [];
-    let owners = 0;
+    // Single-pass processing for efficiency
+    const ownerEmailsSet = new Set();
+    const domainsMap = new Map();
+    const recordCounts = {
+        A: 0,
+        AAAA: 0,
+        CNAME: 0,
+        MX: 0,
+        TXT: 0,
+        NS: 0
+    };
+    const proxiedCounts = {
+        true: 0,
+        false: 0
+    };
 
+    // Process all data in a single pass
     data.forEach(item => {
-        if(ownerEmails.includes(item.owner.email.toLowerCase())) return;
+        // Count unique owners
+        const emailLower = item.owner.email.toLowerCase();
+        ownerEmailsSet.add(emailLower);
 
-        ownerEmails.push(item.owner.email.toLowerCase());
-        owners++;
-    })
+        // Count subdomains per domain
+        const domain = item.domain;
+        domainsMap.set(domain, (domainsMap.get(domain) || 0) + 1);
 
-    const domains = [];
+        // Count record types
+        if (item.records.A) recordCounts.A++;
+        if (item.records.AAAA) recordCounts.AAAA++;
+        if (item.records.CNAME) recordCounts.CNAME++;
+        if (item.records.MX) recordCounts.MX++;
+        if (item.records.TXT) recordCounts.TXT++;
+        if (item.records.NS) recordCounts.NS++;
 
-    data.forEach(item => {
-        if(domains.includes(item.domain)) return;
-
-        domains.push(item.domain);
-    })
-
-    const domainData = [];
-
-    domains.forEach(domain => {
-        const obj = {
-            "domain": domain,
-            "subdomains": data.filter(item => item.domain.toLowerCase() === domain.toLowerCase()).length
+        // Count proxied status
+        if (item.proxied === true) {
+            proxiedCounts.true++;
+        } else {
+            proxiedCounts.false++;
         }
+    });
 
-        domainData.push(obj);
-    })
+    // Build domain data array from map
+    const domainData = Array.from(domainsMap.entries()).map(([domain, count]) => ({
+        domain: domain,
+        subdomains: count
+    }));
 
     return res.status(200).json({
         "subdomains": data.length,
-        "individual_owners": owners,
+        "individual_owners": ownerEmailsSet.size,
         "domains": domainData,
-        "records": {
-            "A": data.filter(item => item.records.A).length,
-            "AAAA": data.filter(item => item.records.AAAA).length,
-            "CNAME": data.filter(item => item.records.CNAME).length,
-            "MX": data.filter(item => item.records.MX).length,
-            "TXT": data.filter(item => item.records.TXT).length,
-            "NS": data.filter(item => item.records.NS).length
-        },
-        "proxied": {
-            "true": data.filter(item => item.proxied === true).length,
-            "false": data.filter(item => item.proxied === false).length
-        }
-    })
+        "records": recordCounts,
+        "proxied": proxiedCounts
+    });
 }

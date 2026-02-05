@@ -17,38 +17,40 @@ module.exports = async (req, res) => {
         return res.status(500).json({ "error": "Failed to fetch data" });
     }
 
-    const userDomains = data.filter(item => item.owner.email.replace(" (at) ", "@").toLowerCase() === email.toLowerCase());
+    const emailLower = email.toLowerCase();
+    const userDomains = [];
+    const subdomains = [];
+    const domainMap = new Map();
+
+    // Single-pass filtering and processing
+    for (const item of data) {
+        const itemEmail = item.owner.email.replace(" (at) ", "@").toLowerCase();
+        
+        if (itemEmail === emailLower) {
+            userDomains.push(item);
+            subdomains.push(`${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`);
+            
+            // Track domains and their subdomains
+            const domain = item.domain.toLowerCase();
+            if (!domainMap.has(domain)) {
+                domainMap.set(domain, []);
+            }
+            domainMap.get(domain).push(item.subdomain);
+        }
+    }
 
     if(!userDomains.length) return res.status(404).json({ "code": "USER_NOT_FOUND" });
 
-    let subdomains = [];
-
-    userDomains.forEach(item => {
-        subdomains.push(`${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`);
-    })
-
-    const domains = [];
-    const checkedDomains = [];
-
-    data.forEach(item => {
-        if(checkedDomains.includes(item.domain.toLowerCase())) return;
-
-        checkedDomains.push(item.domain.toLowerCase());
-
-        let domain = userDomains.filter(i => i.domain.toLowerCase() === item.domain.toLowerCase());
-
-        const itemSubdomains = [];
-
-        domain.forEach(d => {
-            itemSubdomains.push(d.subdomain);
-        })
-
-        domains.push({"domain":item.domain,"count":domain.length,"subdomains":itemSubdomains});
-    })
+    // Build domains array from map
+    const domains = Array.from(domainMap.entries()).map(([domain, subs]) => ({
+        domain: domain,
+        count: subs.length,
+        subdomains: subs
+    }));
 
     return res.status(200).json({
         "count": userDomains.length,
         "domains": domains,
         "subdomains": subdomains
-    })
+    });
 }

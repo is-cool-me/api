@@ -15,29 +15,22 @@ module.exports = async (req, res) => {
         return res.status(500).json({ "error": "Failed to fetch data" });
     }
 
-    data = data.filter(item => item.domain === domain);
-
-    if(!data[0]) return res.status(404).json({ "code": "DOMAIN_NOT_FOUND" });
-
-    const ownerEmails = [];
-    let owners = 0;
-
-    data.forEach(item => {
-        if(ownerEmails.includes(item.owner.email)) return;
-
-        ownerEmails.push(item.owner.email);
-        owners++;
-    })
-
+    const ownerEmailsSet = new Set();
     const subdomains = [];
 
-    data.forEach(item => {
-        subdomains.push(item.subdomain);
-    })
+    // Single-pass filtering and processing
+    for (const item of data) {
+        if (item.domain === domain) {
+            ownerEmailsSet.add(item.owner.email);
+            subdomains.push(item.subdomain);
+        }
+    }
+
+    if(subdomains.length === 0) return res.status(404).json({ "code": "DOMAIN_NOT_FOUND" });
 
     return res.status(200).json({
         "count": subdomains.length,
-        "individual_owners": owners,
+        "individual_owners": ownerEmailsSet.size,
         "subdomains": subdomains
-    })
+    });
 }
