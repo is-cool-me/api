@@ -72,6 +72,7 @@ module.exports = async (req, res) => {
             "proxied": proxiedCounts
         });
     } catch(err) {
+        console.error('Error processing count data:', err);
         return res.status(500).json({ "error": "Failed to process data" });
     }
 }

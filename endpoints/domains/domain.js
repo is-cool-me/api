@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
             "subdomains": subdomains
         });
     } catch(err) {
+        console.error('Error processing domains data:', err);
         return res.status(500).json({ "error": "Failed to process data" });
     }
 }

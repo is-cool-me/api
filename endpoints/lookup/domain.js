@@ -22,6 +22,7 @@ module.exports = async (req, res) => {
 
         return res.status(200).json(data);
     } catch(err) {
+        console.error('Error processing lookup/domain data:', err);
         return res.status(500).json({ "error": "Failed to process data" });
     }
 }
