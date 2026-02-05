@@ -39,6 +39,12 @@ app.use("/", router);
 
 Sentry.setupExpressErrorHandler(app);
 
-app.listen(port, () => {
-    console.log(`[API] Listening on Port: ${port}`);
-});
+// Export the app for Vercel serverless functions
+module.exports = app;
+
+// Only start the server if running locally (not on Vercel)
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`[API] Listening on Port: ${port}`);
+    });
+}
