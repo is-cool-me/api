@@ -22,6 +22,14 @@ module.exports = async (req, res) => {
             }
         };
 
+        // Helper to check if result indicates domain is registered
+        const isSuccessfulResult = (result) => {
+            return result.status === 'fulfilled' && 
+                   result.value && 
+                   result.value.status !== 404 && 
+                   !result.value.error;
+        };
+
         // Make all three requests in parallel for faster response
         const urls = [
             `https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`,
@@ -46,7 +54,7 @@ module.exports = async (req, res) => {
 
         // Check if any request succeeded (non-404 response)
         for (const result of results) {
-            if (result.status === 'fulfilled' && result.value && result.value.status !== 404 && !result.value.error) {
+            if (isSuccessfulResult(result)) {
                 const data = result.value.data;
                 // GitHub API returns {message: "Not Found"} for 404s
                 // If data exists and doesn't have error message, domain is registered
