@@ -28,7 +28,10 @@ module.exports = async (req, res) => {
         
         if (itemEmail === emailLower) {
             userDomains.push(item);
-            subdomains.push(`${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`);
+            
+            // Compute full subdomain once for consistency
+            const fullSubdomain = `${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`;
+            subdomains.push(fullSubdomain);
             
             // Track domains and their subdomains (use lowercase for consistency)
             const domainLower = item.domain.toLowerCase();
