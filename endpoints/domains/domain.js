@@ -18,9 +18,9 @@ module.exports = async (req, res) => {
     const ownerEmailsSet = new Set();
     const subdomains = [];
 
-    // Single-pass filtering and processing
+    // Single-pass filtering and processing (case-insensitive domain matching)
     for (const item of data) {
-        if (item.domain === domain) {
+        if (item.domain.toLowerCase() === domain) {
             ownerEmailsSet.add(item.owner.email);
             subdomains.push(item.subdomain);
         }
