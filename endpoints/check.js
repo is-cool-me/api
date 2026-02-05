@@ -7,32 +7,33 @@ module.exports = async (req, res) => {
 
     let data;
 
+    const requestTimeout = 8000; // 8 second timeout per request
+    
     try {
-        // Create AbortController for timeout
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        // Helper function to create fetch with timeout
+        const fetchWithTimeout = async (url) => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+            
+            try {
+                const result = await fetch(url, { signal: controller.signal });
+                return result;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        };
 
-        try {
-            let result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`, {
-                signal: controller.signal
-            });
+        let result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`);
+        data = await result.json();
+
+        if(result.status == 404) {
+            result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`);
             data = await result.json();
+        }
 
-            if(result.status == 404) {
-                result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`, {
-                    signal: controller.signal
-                });
-                data = await result.json();
-            }
-
-            if(result.status == 404) {
-                result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`, {
-                    signal: controller.signal
-                });
-                data = await result.json();
-            }
-        } finally {
-            clearTimeout(timeout);
+        if(result.status == 404) {
+            result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`);
+            data = await result.json();
         }
     } catch(err) {
         if (err.name === 'AbortError') {
