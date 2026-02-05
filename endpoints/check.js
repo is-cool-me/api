@@ -36,7 +36,8 @@ module.exports = async (req, res) => {
             data = await result.json();
         }
     } catch(err) {
-        if (err.name === 'AbortError') {
+        // Check for timeout/abort errors
+        if (err.name === 'AbortError' || (err.code === 20)) {
             return res.status(504).json({ "error": "Request timeout" });
         }
         return res.status(500).json({ "error": "Failed to fetch data" });
