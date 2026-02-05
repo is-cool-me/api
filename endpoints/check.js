@@ -40,6 +40,8 @@ module.exports = async (req, res) => {
         for (const result of results) {
             if (result.status === 'fulfilled' && result.value.status !== 404) {
                 const data = result.value.data;
+                // GitHub API returns {message: "Not Found"} for 404s
+                // If data exists and doesn't have error message, domain is registered
                 if (data && !data.message) {
                     return res.status(200).json({ "message": "DOMAIN_UNAVAILABLE" });
                 }

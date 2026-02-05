@@ -1,4 +1,17 @@
-// Simple in-memory cache with TTL
+/**
+ * Simple in-memory cache with TTL (Time To Live) support.
+ * This class implements a singleton pattern for caching data across the application.
+ * 
+ * Features:
+ * - Automatic expiration based on TTL
+ * - Memory-efficient cleanup of expired entries
+ * - Simple key-value storage
+ * 
+ * Usage:
+ *   const cache = require('./cache');
+ *   cache.set('myKey', myValue, 60000); // Cache for 60 seconds
+ *   const value = cache.get('myKey'); // Returns value or null if expired/not found
+ */
 class Cache {
     constructor() {
         this.cache = new Map();

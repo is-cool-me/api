@@ -29,7 +29,7 @@ async function fetchRawData() {
         
         return data;
     } catch (err) {
-        throw new Error("Failed to fetch data");
+        throw new Error(`Failed to fetch data: ${err.message}`);
     }
 }
 
