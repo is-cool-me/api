@@ -1,5 +1,5 @@
 module.exports = async (req, res) => {
-    const axios = require("axios");
+    const { fetchRawData } = require("../../util/fetchRawData");
 
     const email = req.query.email;
 
@@ -8,11 +8,7 @@ module.exports = async (req, res) => {
     let data;
 
     try {
-        const result = await axios.get("https://is-cool-me.github.io/raw", {
-            timeout: 8000 // 8 second timeout
-        });
-
-        data = result.data;
+        data = await fetchRawData();
     } catch(err) {
         return res.status(500).json({ "error": "Failed to fetch data" });
     }
