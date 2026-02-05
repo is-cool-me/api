@@ -5,9 +5,7 @@ module.exports = async (req, res) => {
 
     if(!domain) return res.status(400).json({ "code": "NO_DOMAIN" });
 
-    let data;
-
-    const requestTimeout = 8000; // 8 second timeout per request
+    const requestTimeout = 5000; // 5 second timeout per request
     const ABORT_ERR_CODE = 20; // DOMException.ABORT_ERR
     
     try {
@@ -24,18 +22,32 @@ module.exports = async (req, res) => {
             }
         };
 
-        let result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`);
-        data = await result.json();
+        // Make all three requests in parallel for faster response
+        const urls = [
+            `https://api.github.com/repos/is-cool-me/register/contents/domains/${domain.toLowerCase()}.json`,
+            `https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`,
+            `https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`
+        ];
 
-        if(result.status == 404) {
-            result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`);
-            data = await result.json();
+        const results = await Promise.allSettled(
+            urls.map(url => fetchWithTimeout(url).then(async (result) => {
+                const data = await result.json();
+                return { status: result.status, data };
+            }))
+        );
+
+        // Check if any request succeeded (non-404 response)
+        for (const result of results) {
+            if (result.status === 'fulfilled' && result.value.status !== 404) {
+                const data = result.value.data;
+                if (data && !data.message) {
+                    return res.status(200).json({ "message": "DOMAIN_UNAVAILABLE" });
+                }
+            }
         }
 
-        if(result.status == 404) {
-            result = await fetchWithTimeout(`https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`);
-            data = await result.json();
-        }
+        // All requests returned 404 or had errors - domain is available
+        return res.status(200).json({ "message": "DOMAIN_AVAILABLE" });
     } catch(err) {
         // Check for timeout/abort errors
         if (err.name === 'AbortError' || err.code === ABORT_ERR_CODE) {
@@ -43,8 +55,4 @@ module.exports = async (req, res) => {
         }
         return res.status(500).json({ "error": "Failed to fetch data" });
     }
-
-    if(data && !data.message) return res.status(200).json({ "message": "DOMAIN_UNAVAILABLE" });
-
-    res.status(200).json({ "message": "DOMAIN_AVAILABLE" });
 }
