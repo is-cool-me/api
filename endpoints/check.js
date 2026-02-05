@@ -31,14 +31,22 @@ module.exports = async (req, res) => {
 
         const results = await Promise.allSettled(
             urls.map(url => fetchWithTimeout(url).then(async (result) => {
-                const data = await result.json();
-                return { status: result.status, data };
+                try {
+                    const data = await result.json();
+                    return { status: result.status, data };
+                } catch (jsonErr) {
+                    // If JSON parsing fails, treat as error
+                    return { status: result.status, data: null, error: jsonErr };
+                }
+            }).catch(fetchErr => {
+                // If fetch fails, return error state
+                return { status: 500, data: null, error: fetchErr };
             }))
         );
 
         // Check if any request succeeded (non-404 response)
         for (const result of results) {
-            if (result.status === 'fulfilled' && result.value.status !== 404) {
+            if (result.status === 'fulfilled' && result.value && result.value.status !== 404 && !result.value.error) {
                 const data = result.value.data;
                 // GitHub API returns {message: "Not Found"} for 404s
                 // If data exists and doesn't have error message, domain is registered
@@ -55,6 +63,7 @@ module.exports = async (req, res) => {
         if (err.name === 'AbortError' || err.code === ABORT_ERR_CODE) {
             return res.status(504).json({ "error": "Request timeout" });
         }
-        return res.status(500).json({ "error": "Failed to fetch data" });
+        console.error('Error checking domain:', err);
+        return res.status(500).json({ "error": "Failed to check domain" });
     }
 }

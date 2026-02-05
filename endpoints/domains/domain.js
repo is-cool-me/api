@@ -12,11 +12,22 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+            console.error('Domains endpoint: data is not an array', typeof data);
+            return res.status(500).json({ "error": "Invalid data format" });
+        }
+
         const ownerEmailsSet = new Set();
         const subdomains = [];
 
         // Single-pass filtering and processing (case-insensitive domain matching)
         for (const item of data) {
+            // Skip items with missing required fields
+            if (!item || !item.domain || !item.owner || !item.owner.email || !item.subdomain) {
+                continue;
+            }
+
             if (item.domain.toLowerCase() === domain) {
                 ownerEmailsSet.add(item.owner.email);
                 subdomains.push(item.subdomain);

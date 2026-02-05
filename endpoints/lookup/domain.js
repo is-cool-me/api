@@ -14,7 +14,19 @@ module.exports = async (req, res) => {
     }
 
     try {
-        data = data.filter(item => `${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}` === domain.toLowerCase());
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+            console.error('Lookup/domain endpoint: data is not an array', typeof data);
+            return res.status(500).json({ "error": "Invalid data format" });
+        }
+
+        data = data.filter(item => {
+            // Skip items with missing required fields
+            if (!item || !item.subdomain || !item.domain) {
+                return false;
+            }
+            return `${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}` === domain.toLowerCase();
+        });
 
         if(!data[0]) return res.status(404).json({ "code": "DOMAIN_NOT_FOUND" });
 

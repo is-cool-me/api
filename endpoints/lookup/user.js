@@ -14,6 +14,12 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+            console.error('Lookup/user endpoint: data is not an array', typeof data);
+            return res.status(500).json({ "error": "Invalid data format" });
+        }
+
         const emailLower = email.toLowerCase();
         const userDomains = [];
         const subdomains = [];
@@ -21,6 +27,11 @@ module.exports = async (req, res) => {
 
         // Single-pass filtering and processing
         for (const item of data) {
+            // Skip items with missing required fields
+            if (!item || !item.owner || !item.owner.email || !item.domain || !item.subdomain) {
+                continue;
+            }
+
             const itemEmail = item.owner.email.replace(" (at) ", "@").toLowerCase();
             
             if (itemEmail === emailLower) {

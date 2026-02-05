@@ -10,6 +10,12 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+            console.error('Count endpoint: data is not an array', typeof data);
+            return res.status(500).json({ "error": "Invalid data format" });
+        }
+
         // Single-pass processing for efficiency
         const ownerEmailsSet = new Set();
         const domainsMap = new Map();
@@ -28,6 +34,11 @@ module.exports = async (req, res) => {
 
         // Process all data in a single pass
         data.forEach(item => {
+            // Skip items with missing required fields
+            if (!item || !item.owner || !item.owner.email || !item.domain) {
+                return;
+            }
+
             // Count unique owners
             const emailLower = item.owner.email.toLowerCase();
             ownerEmailsSet.add(emailLower);
@@ -42,13 +53,15 @@ module.exports = async (req, res) => {
             }
             domainsMap.get(domainLower).count++;
 
-            // Count record types
-            if (item.records.A) recordCounts.A++;
-            if (item.records.AAAA) recordCounts.AAAA++;
-            if (item.records.CNAME) recordCounts.CNAME++;
-            if (item.records.MX) recordCounts.MX++;
-            if (item.records.TXT) recordCounts.TXT++;
-            if (item.records.NS) recordCounts.NS++;
+            // Count record types (safely check if records exist)
+            if (item.records) {
+                if (item.records.A) recordCounts.A++;
+                if (item.records.AAAA) recordCounts.AAAA++;
+                if (item.records.CNAME) recordCounts.CNAME++;
+                if (item.records.MX) recordCounts.MX++;
+                if (item.records.TXT) recordCounts.TXT++;
+                if (item.records.NS) recordCounts.NS++;
+            }
 
             // Count proxied status
             if (item.proxied === true) {
