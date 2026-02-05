@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
         // Count proxied status
         if (item.proxied === true) {
             proxiedCounts.true++;
-        } else {
+        } else if (item.proxied === false) {
             proxiedCounts.false++;
         }
     });

@@ -30,20 +30,23 @@ module.exports = async (req, res) => {
             userDomains.push(item);
             subdomains.push(`${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`);
             
-            // Track domains and their subdomains
-            const domain = item.domain.toLowerCase();
-            if (!domainMap.has(domain)) {
-                domainMap.set(domain, []);
+            // Track domains and their subdomains (use lowercase for consistency)
+            const domainLower = item.domain.toLowerCase();
+            if (!domainMap.has(domainLower)) {
+                domainMap.set(domainLower, {
+                    originalCase: item.domain,
+                    subdomains: []
+                });
             }
-            domainMap.get(domain).push(item.subdomain);
+            domainMap.get(domainLower).subdomains.push(item.subdomain);
         }
     }
 
     if(!userDomains.length) return res.status(404).json({ "code": "USER_NOT_FOUND" });
 
     // Build domains array from map
-    const domains = Array.from(domainMap.entries()).map(([domain, subs]) => ({
-        domain,
+    const domains = Array.from(domainMap.values()).map(({ originalCase, subdomains: subs }) => ({
+        domain: originalCase,
         count: subs.length,
         subdomains: subs
     }));
