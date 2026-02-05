@@ -38,7 +38,8 @@ module.exports = async (req, res) => {
                     subdomains: []
                 });
             }
-            domainMap.get(domainLower).subdomains.push(item.subdomain);
+            // Store subdomain in lowercase for consistency
+            domainMap.get(domainLower).subdomains.push(item.subdomain.toLowerCase());
         }
     }
 

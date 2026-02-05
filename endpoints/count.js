@@ -35,9 +35,15 @@ module.exports = async (req, res) => {
         const emailLower = item.owner.email.toLowerCase();
         ownerEmailsSet.add(emailLower);
 
-        // Count subdomains per domain
-        const domain = item.domain;
-        domainsMap.set(domain, (domainsMap.get(domain) || 0) + 1);
+        // Count subdomains per domain (use lowercase key for consistency)
+        const domainLower = item.domain.toLowerCase();
+        if (!domainsMap.has(domainLower)) {
+            domainsMap.set(domainLower, {
+                originalCase: item.domain,
+                count: 0
+            });
+        }
+        domainsMap.get(domainLower).count++;
 
         // Count record types
         if (item.records.A) recordCounts.A++;
@@ -56,8 +62,8 @@ module.exports = async (req, res) => {
     });
 
     // Build domain data array from map
-    const domainData = Array.from(domainsMap.entries()).map(([domain, count]) => ({
-        domain,
+    const domainData = Array.from(domainsMap.values()).map(({ originalCase, count }) => ({
+        domain: originalCase,
         subdomains: count
     }));
 
