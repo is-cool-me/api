@@ -8,13 +8,11 @@ module.exports = async (req, res) => {
     let data;
 
     try {
-        const result = await axios.get("https://is-cool-me.github.io/raw", {
-            timeout: 8000 // 8 second timeout
-        });
+        const result = await axios.get("https://is-cool-me.github.io/raw");
 
         data = result.data;
     } catch(err) {
-        return res.status(500).json({ "error": "Failed to fetch data" });
+        return res.status(500);
     }
 
     data = data.filter(item => `${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}` === domain.toLowerCase());
