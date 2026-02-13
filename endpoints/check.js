@@ -12,11 +12,6 @@ module.exports = async (req, res) => {
         data = await result.json();
 
         if(result.status == 404) {
-            result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/AorzoHosting/${domain.toLowerCase()}.json`);
-            data = await result.json();
-        }
-
-        if(result.status == 404) {
             result = await fetch(`https://api.github.com/repos/is-cool-me/register/contents/domains/reserved/${domain.toLowerCase()}.json`);
             data = await result.json();
         }
