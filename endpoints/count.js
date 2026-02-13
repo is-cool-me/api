@@ -15,6 +15,8 @@ module.exports = async (req, res) => {
     let owners = 0;
 
     data.forEach(item => {
+        if(!item.owner || !item.owner.email) return;
+        
         if(ownerEmails.includes(item.owner.email.toLowerCase())) return;
 
         ownerEmails.push(item.owner.email.toLowerCase());
@@ -24,6 +26,8 @@ module.exports = async (req, res) => {
     const domains = [];
 
     data.forEach(item => {
+        if(!item.domain) return;
+        
         if(domains.includes(item.domain)) return;
 
         domains.push(item.domain);
@@ -34,7 +38,7 @@ module.exports = async (req, res) => {
     domains.forEach(domain => {
         const obj = {
             "domain": domain,
-            "subdomains": data.filter(item => item.domain.toLowerCase() === domain.toLowerCase()).length
+            "subdomains": data.filter(item => item.domain && item.domain.toLowerCase() === domain.toLowerCase()).length
         }
 
         domainData.push(obj);
@@ -45,12 +49,12 @@ module.exports = async (req, res) => {
         "individual_owners": owners,
         "domains": domainData,
         "records": {
-            "A": data.filter(item => item.records.A).length,
-            "AAAA": data.filter(item => item.records.AAAA).length,
-            "CNAME": data.filter(item => item.records.CNAME).length,
-            "MX": data.filter(item => item.records.MX).length,
-            "TXT": data.filter(item => item.records.TXT).length,
-            "NS": data.filter(item => item.records.NS).length
+            "A": data.filter(item => item.records && item.records.A).length,
+            "AAAA": data.filter(item => item.records && item.records.AAAA).length,
+            "CNAME": data.filter(item => item.records && item.records.CNAME).length,
+            "MX": data.filter(item => item.records && item.records.MX).length,
+            "TXT": data.filter(item => item.records && item.records.TXT).length,
+            "NS": data.filter(item => item.records && item.records.NS).length
         },
         "proxied": {
             "true": data.filter(item => item.proxied === true).length,
