@@ -8,56 +8,45 @@ module.exports = async (req, res) => {
     let data;
 
     try {
-        const result = await axios.get("https://is-cool-me.github.io/raw", {
-            timeout: 8000 // 8 second timeout
-        });
+        const result = await axios.get("https://is-cool-me.github.io/raw");
 
         data = result.data;
     } catch(err) {
-        return res.status(500).json({ "error": "Failed to fetch data" });
+        return res.status(500);
     }
 
-    const emailLower = email.toLowerCase();
-    const userDomains = [];
-    const subdomains = [];
-    const domainMap = new Map();
-
-    // Single-pass filtering and processing
-    for (const item of data) {
-        const itemEmail = item.owner.email.replace(" (at) ", "@").toLowerCase();
-        
-        if (itemEmail === emailLower) {
-            userDomains.push(item);
-            
-            // Compute full subdomain once for consistency
-            const fullSubdomain = `${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`;
-            subdomains.push(fullSubdomain);
-            
-            // Track domains and their subdomains (use lowercase for consistency)
-            const domainLower = item.domain.toLowerCase();
-            if (!domainMap.has(domainLower)) {
-                domainMap.set(domainLower, {
-                    originalCase: item.domain,
-                    subdomains: []
-                });
-            }
-            // Store subdomain in lowercase for consistency
-            domainMap.get(domainLower).subdomains.push(item.subdomain.toLowerCase());
-        }
-    }
+    const userDomains = data.filter(item => item.owner.email.replace(" (at) ", "@").toLowerCase() === email.toLowerCase());
 
     if(!userDomains.length) return res.status(404).json({ "code": "USER_NOT_FOUND" });
 
-    // Build domains array from map
-    const domains = Array.from(domainMap.values()).map(({ originalCase, subdomains: subs }) => ({
-        domain: originalCase,
-        count: subs.length,
-        subdomains: subs
-    }));
+    let subdomains = [];
+
+    userDomains.forEach(item => {
+        subdomains.push(`${item.subdomain.toLowerCase()}.${item.domain.toLowerCase()}`);
+    })
+
+    const domains = [];
+    const checkedDomains = [];
+
+    data.forEach(item => {
+        if(checkedDomains.includes(item.domain.toLowerCase())) return;
+
+        checkedDomains.push(item.domain.toLowerCase());
+
+        let domain = userDomains.filter(i => i.domain.toLowerCase() === item.domain.toLowerCase());
+
+        const itemSubdomains = [];
+
+        domain.forEach(d => {
+            itemSubdomains.push(d.subdomain);
+        })
+
+        domains.push({"domain":item.domain,"count":domain.length,"subdomains":itemSubdomains});
+    })
 
     return res.status(200).json({
         "count": userDomains.length,
         "domains": domains,
         "subdomains": subdomains
-    });
+    })
 }
