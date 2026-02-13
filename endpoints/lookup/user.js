@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
         return res.status(500);
     }
 
-    const userDomains = data.filter(item => item.owner.email.replace(" (at) ", "@").toLowerCase() === email.toLowerCase());
+    const userDomains = data.filter(item => item.owner.email && item.owner.email.replace(" (at) ", "@").toLowerCase() === email.toLowerCase());
 
     if(!userDomains.length) return res.status(404).json({ "code": "USER_NOT_FOUND" });
 

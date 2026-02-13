@@ -15,6 +15,7 @@ module.exports = async (req, res) => {
     let owners = 0;
 
     data.forEach(item => {
+        if(!item.owner.email) return;
         if(ownerEmails.includes(item.owner.email.toLowerCase())) return;
 
         ownerEmails.push(item.owner.email.toLowerCase());
